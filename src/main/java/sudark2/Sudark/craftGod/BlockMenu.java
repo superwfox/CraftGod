@@ -26,7 +26,10 @@ public class BlockMenu {
     public static void menuInit(Player p) {
         List<BlockDisplay> choices = spawnMenu(
                 List.of(
-                        nameItem(Material.)
+                        nameItem(Material.QUARTZ_STAIRS,"创造"),
+                        nameItem(Material.BEDROCK,"打印他人的投影"),
+                        nameItem(Material.GRAY_BED,"建造"),
+                        nameItem(Material.BEACON,"从建筑码获取投影")
                 ),
                 p,
                 1

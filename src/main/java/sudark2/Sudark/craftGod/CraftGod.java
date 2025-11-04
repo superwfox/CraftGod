@@ -10,14 +10,14 @@ import java.util.List;
 
 public final class CraftGod extends JavaPlugin {
 
-    List<BlockDisplay> displays = new ArrayList<>();
+    static List<BlockDisplay> displays = new ArrayList<>();
 
     @Override
     public void onEnable() {
-        Bukkit.getServer()
+        Bukkit.getPluginManager().registerEvents(new PlayerInteractEvent(), this);
     }
 
-    public static Plugin get(){
+    public static Plugin get() {
         return Bukkit.getPluginManager().getPlugin("CraftGod");
     }
 

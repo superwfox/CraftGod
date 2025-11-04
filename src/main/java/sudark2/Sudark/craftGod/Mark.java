@@ -3,7 +3,10 @@ package sudark2.Sudark.craftGod;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Particle;
+import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
+import org.bukkit.entity.BlockDisplay;
+import org.bukkit.entity.EntityType;
 
 import java.util.List;
 
@@ -20,7 +23,8 @@ public class Mark {
 
     public void markDisplay(List<Mark> marks, Location loc) {
         for (Mark mark : marks) {
-            loc.getWorld().spawnParticle(Particle.BLOCK_MARKER, loc.add(mark.getDx(), mark.getDy(), mark.getDz()), 1, mark.getData());
+           BlockDisplay block = (BlockDisplay) loc.getWorld().spawnEntity(loc.add(mark.getDx(), mark.getDy(), mark.getDz()),EntityType.BLOCK_DISPLAY);
+            block.setBlock(mark.getData());
             //loc.add(mark.getDx(), mark.getDy(), mark.getDz()).getBlock().setBlockData(mark.getData());
         }
     }

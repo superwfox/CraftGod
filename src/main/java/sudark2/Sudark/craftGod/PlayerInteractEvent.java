@@ -8,8 +8,9 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.metadata.FixedMetadataValue;
 
+import static sudark2.Sudark.craftGod.BlockMenu.menuInit;
 import static sudark2.Sudark.craftGod.CraftGod.get;
 
 public class PlayerInteractEvent implements Listener {
@@ -19,23 +20,27 @@ public class PlayerInteractEvent implements Listener {
         Player pl = event.getPlayer();
         Action ac = event.getAction();
 
-        if (!ac.equals(Action.RIGHT_CLICK_AIR)) return;
+        if (ac.equals(Action.RIGHT_CLICK_AIR) || ac.equals(Action.RIGHT_CLICK_BLOCK)) {
+            pl.setMetadata("click",new FixedMetadataValue(get(), true));
+        }
 
+    }
+
+    @EventHandler
+    public void onPlayerClickAtBlock(org.bukkit.event.player.PlayerToggleSneakEvent event) {
+        Player pl = event.getPlayer();
         ItemStack item = pl.getItemInHand();
         if (item.getType() != Material.LIGHTNING_ROD) return;
 
-        new BukkitRunnable() {
-            World world = pl.getWorld();
-            int n = 0;
+        if(pl.isSneaking()){
+            pl.setMetadata("sneak", new FixedMetadataValue(get(), true));
+            pl.setSneaking(true);
+        }else{
+            pl.setMetadata("sneak", new FixedMetadataValue(get(), true));
+            pl.setSneaking(true);
+            menuInit(pl);
+        }
 
-            @Override
-            public void run() {
-
-                n++;
-                if (n == 40)
-                    cancel();
-            }
-        }.runTaskTimer(get(), 0, 4 * 20);
 
 
     }

@@ -26,10 +26,6 @@ public class Mark {
         }
     }
 
-    public int[] getLoc() {
-        return new int[]{dx, dy, dz};
-    }
-
     public int getDx() {
         return dx;
     }
@@ -44,5 +40,9 @@ public class Mark {
 
     public BlockData getData() {
         return data;
+    }
+
+    public String getDataAsString() {
+        return data.getAsString(true);
     }
 }

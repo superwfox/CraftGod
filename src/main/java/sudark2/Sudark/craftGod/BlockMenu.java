@@ -1,23 +1,20 @@
 package sudark2.Sudark.craftGod;
 
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.entity.BlockDisplay;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Transformation;
 import org.bukkit.util.Vector;
-import org.joml.AxisAngle4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
-import sudark2.Sudark.craftGod.menus.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import static sudark2.Sudark.craftGod.CraftGod.displays;
 import static sudark2.Sudark.craftGod.CraftGod.get;
@@ -25,34 +22,54 @@ import static sudark2.Sudark.craftGod.CraftGod.get;
 public class BlockMenu {
     // 1 创造 2 打印他人的投影 3 建造 4 从建筑码获取投影 5 显示距离调整
 
-    public static void menuInit(Player p) {
-        List<BlockDisplay> choices = spawnMenu(
-                List.of(
-                        nameItem(Material.SCULK_SHRIEKER, "创造"),
-                        nameItem(Material.BEDROCK, "打印他人的投影"),
-                        nameItem(Material.AMETHYST_CLUSTER, "建造"),
-                        nameItem(Material.BEACON, "从建筑码获取投影")
-                ),
-                p,
-                1
-        );
+    public static final NamespacedKey MENU_INDEX_KEY = new NamespacedKey(get(), "menu_index");
 
+    public static ItemStack nameItem(Material m, String name) {
+        ItemStack item = new ItemStack(m, 1);
+        ItemMeta meta = item.getItemMeta();
+        meta.setDisplayName(name);
+        item.setItemMeta(meta);
+        return item;
+    }
+
+    public static CompletableFuture<Integer> menuInit(Player p, List<BlockDisplay> choices){
+        // 1. 创建 CompletableFuture 实例
+        CompletableFuture<Integer> futureIndex = new CompletableFuture<>();
+
+        // 确保移除旧的元数据
         p.removeMetadata("sneak", get());
 
         new BukkitRunnable() {
             Location centerLoc = p.getLocation();
+            int distanceSquared = (choices.size() + 2) * (choices.size() + 2);
+            int time = 0;
 
             @Override
             public void run() {
 
-                if (!p.isOnline() || p.getLocation().distanceSquared(centerLoc) > 100) {
-                    p.removeMetadata("sneak", get());
+                time++;
+
+                if (time > 300 * 10) {
+                    if (!futureIndex.isDone()) {
+                        futureIndex.complete(-1);
+                    }
+                    title(p, "[§e弃选]", "时间超过5分钟-自动为您弃选");
                     menuFadeout(choices);
                     cancel();
                     return;
                 }
 
-                BlockDisplay bl = getTargetByAngle(p, choices);
+                if (!p.isOnline() || p.getLocation().distanceSquared(centerLoc) > distanceSquared) {
+                    if (!futureIndex.isDone()) {
+                        futureIndex.complete(-1);
+                    }
+                    menuFadeout(choices);
+                    cancel();
+                    return;
+                }
+
+                // --- 目标检测与高亮 ---
+                BlockDisplay bl = getTarget(p, choices);
 
                 for (BlockDisplay display : choices) {
                     if (bl == display) {
@@ -60,58 +77,47 @@ public class BlockMenu {
                     } else {
                         if (display.getTransformation().equals(huge)) reduce(display);
                     }
-
                     rotate(display);
                 }
 
+                // --- 选中逻辑 (潜行触发) ---
                 if (!p.hasMetadata("sneak")) return;
 
-                if (bl != null) switch (bl.getBlock().getMaterial()) {
-                    case QUARTZ_STAIRS -> menuCreate.menu(p);
-                    case BEDROCK -> menuPrint.menu(p);
-                    case GRAY_BED -> menuBuild.menu(p);
-                    case BEACON -> menuReflect.menu(p);
-                }
-                p.removeMetadata("sneak", get());
-                menuFadeout(choices);
-                cancel();
+                if (bl != null) {
+                    Integer index = bl.getPersistentDataContainer().get(MENU_INDEX_KEY, PersistentDataType.INTEGER);
 
-            }
-        }.runTaskTimerAsynchronously(get(), 7, 2);
-    }
-
-    public static void menuFadeout(List<BlockDisplay> choices) {
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                if (choices.isEmpty()) {
+                    if (index != null && !futureIndex.isDone()) {
+                        futureIndex.complete(index);
+                    }
+                    p.removeMetadata("sneak", get());
+                    menuFadeout(choices);
                     cancel();
                     return;
                 }
-
-                BlockDisplay display = choices.getFirst();
-                display.setGlowing(false);
-                display.setCustomNameVisible(false);
-                display.setTeleportDuration(5);
-                display.teleport(display.getLocation().add(0, -3, 0));
-                Bukkit.getScheduler().runTaskLater(get(), () -> display.remove(), 5);
-                choices.remove(display);
+                p.removeMetadata("sneak", get());
+                if (!futureIndex.isDone()) {
+                    futureIndex.complete(-2);
+                }
+                menuFadeout(choices);
+                cancel();
             }
-        }.runTaskTimer(get(), 0, 2);
+        }.runTaskTimerAsynchronously(get(), 7, 2);
+
+        return futureIndex;
     }
 
     static float p = 5.5f * 0.125f;
     public static Transformation normal = new Transformation(
             new Vector3f(-p / 2f, -0.5f, -p / 2f),
-            new Quaternionf(), // 旋转（rotation），默认不旋转
-            new Vector3f(p, p, p), // 缩放（scale）到 6/8
+            new Quaternionf().rotateY(-180),
+            new Vector3f(p, p, p),
             new Quaternionf()
     );
 
     static float lp = 7 * 0.125f;
     public static Transformation huge = new Transformation(
             new Vector3f(-lp / 2f, -0.5625f, -lp / 2f),
-            new Quaternionf(), // 旋转（rotation），默认不旋转
+            new Quaternionf().rotateY(30),
             new Vector3f(lp, lp, lp),
             new Quaternionf()
     );
@@ -138,7 +144,8 @@ public class BlockMenu {
         Bukkit.getScheduler().runTask(get(), () -> bd.teleport(loc));
     }
 
-    public static BlockDisplay getTargetByAngle(Player pl, List<BlockDisplay> flags) {
+
+    public static BlockDisplay getTarget(Player pl, List<BlockDisplay> flags) {
         Vector eyePos = pl.getEyeLocation().toVector();
         Vector dir = pl.getEyeLocation().getDirection();
 
@@ -165,6 +172,7 @@ public class BlockMenu {
         }
         return target;
     }
+
 
     public static List<BlockDisplay> spawnMenu(List<ItemStack> blocks, Player pl, int mode) {
         Location plLoc = pl.getLocation();
@@ -200,32 +208,42 @@ public class BlockMenu {
                                 flag.teleport(flag.getLocation().add(0, 2, 0))
                         , 2);
 
+                flag.getPersistentDataContainer().set(
+                        new NamespacedKey(get(), "index"), PersistentDataType.INTEGER,
+                        i // 存储当前的循环索引
+                );
+
                 blockDisplays.add(flag);
                 displays.add(flag);
             }
             return blockDisplays;
         }
 
+        double center = (size - 1) / 2.0;
+
         for (int i = 0; i < size; i++) {
             ItemStack item = blocks.get(i);
             String name = item.getItemMeta().getDisplayName();
-            int parallel = (i + 1) / 2 * (i % 2 == 0 ? 1 : -1);
-            double offset = parallel * spacing;
-            double offsetF = -0.125 * Math.abs(parallel);
+
+            double offset = (i - center) * spacing;
+
             Vector offsetVec = forward.clone().multiply(2.5)
-                    .add(forward.clone().multiply(offsetF))
                     .add(right.clone().multiply(offset));
 
             Location loc = plLoc.clone().add(offsetVec).add(0, -1.5f, 0);
             BlockDisplay flag = world.spawn(loc, BlockDisplay.class);
-            flag.setTeleportDuration(6);
-            Bukkit.getScheduler().runTaskLater(get(), () -> flag.teleport(loc.clone().add(0, 2f, 0)), 1);
 
             flag.setBlock(item.getType().createBlockData());
 
-            flag.setCustomName("[" + name + "]");
+            flag.setCustomName("[§e" + name + "§f]");
 
             flag.setTransformation(normal);
+            flag.setInterpolationDelay(0);
+            flag.setInterpolationDuration(5);
+            flag.setTeleportDuration(5);
+            Bukkit.getScheduler().runTaskLater(get(), () ->
+                            flag.teleport(flag.getLocation().add(0, 2, 0))
+                    , 2);
 
             blockDisplays.add(flag);
             displays.add(flag);
@@ -234,11 +252,41 @@ public class BlockMenu {
 
     }
 
-    public static ItemStack nameItem(Material m, String name) {
-        ItemStack item = new ItemStack(m, 1);
-        ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(name);
-        item.setItemMeta(meta);
-        return item;
+    public static void menuFadeout(List<BlockDisplay> choices) {
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                if (choices.isEmpty()) {
+                    cancel();
+                    return;
+                }
+
+                BlockDisplay display = choices.getFirst();
+                display.setGlowing(false);
+                display.setCustomNameVisible(false);
+                display.setTeleportDuration(5);
+                display.teleport(display.getLocation().add(0, -3, 0));
+                Bukkit.getScheduler().runTaskLater(get(), () -> display.remove(), 5);
+                choices.remove(display);
+            }
+        }.runTaskTimer(get(), 0, 2);
     }
+
+    public static void title(Player pl, String t1, String t2) {
+        new BukkitRunnable() {
+            StringBuilder temt = new StringBuilder("§7_");
+            int i = 0;
+
+            @Override
+            public void run() {
+                temt.append(t2.toCharArray()[i]);
+                pl.sendTitle(t1, temt + "§7_", 0, 50, 20);
+                i++;
+                if (i == t2.length()) {
+                    cancel();
+                }
+            }
+        }.runTaskTimer(get(), 0, 2L);
+    }
+
 }

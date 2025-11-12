@@ -11,13 +11,6 @@ import static sudark2.Sudark.craftGod.CraftGod.get;
 
 public class menuBuild {
     public static void menu(Player p) {
-        new BukkitRunnable() {
-            List<Mark> marks = new ArrayList<>();
 
-            @Override
-            public void run() {
-
-            }
-        }.runTaskTimerAsynchronously(get(), 0, 10);
     }
 }

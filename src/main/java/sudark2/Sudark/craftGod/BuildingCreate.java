@@ -7,6 +7,5 @@ public class BuildingCreate {
 
     public static void listenerCreate(Player pl, Location centerLoc) {
 
-
     }
 }

@@ -4,6 +4,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.BlockDisplay;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
+import sudark2.Sudark.craftGod.menus.FileManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +16,8 @@ public final class CraftGod extends JavaPlugin {
     @Override
     public void onEnable() {
         Bukkit.getPluginManager().registerEvents(new PlayerInteractEvent(), this);
+
+        FileManager.init();
     }
 
     public static Plugin get() {

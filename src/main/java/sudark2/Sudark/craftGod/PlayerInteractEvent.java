@@ -1,6 +1,7 @@
 package sudark2.Sudark.craftGod;
 
 import it.unimi.dsi.fastutil.Pair;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -24,13 +25,35 @@ import static sudark2.Sudark.craftGod.menus.FileManager.saveTemplate;
 
 public class PlayerInteractEvent implements Listener {
 
+    static ConcurrentHashMap<String, Location> temp = new ConcurrentHashMap<>();
+
     @EventHandler
     public void onPlayerClickAtAir(org.bukkit.event.player.PlayerInteractEvent event) {
         Player pl = event.getPlayer();
         Action ac = event.getAction();
 
-        if (ac.equals(Action.RIGHT_CLICK_AIR) || ac.equals(Action.RIGHT_CLICK_BLOCK)) {
+        if (ac.equals(Action.LEFT_CLICK_AIR) || ac.equals(Action.LEFT_CLICK_BLOCK)) {
             pl.setMetadata("click", new FixedMetadataValue(get(), true));
+            Bukkit.getScheduler().runTaskLater(get(), () -> pl.removeMetadata("click", get()), 5);
+
+            if (!pl.hasMetadata("menu")) return;
+
+            ItemStack item = pl.getItemInHand();
+            if (item.getType() != Material.LIGHTNING_ROD) return;
+
+            String name = pl.getName();
+            Location tarLoc = event.getClickedBlock().getLocation();
+            if (!temp.containsKey(name)) {
+                temp.put(name, tarLoc);
+                title(pl, "[还差一角]", "已记录点A 还需要第二个角落");
+                return;
+            }
+
+            title(pl, "[已记录点B]", "现在你可以在§b[所有模板]§f中使用该模板");
+
+            Pair<Location, List<Mark>> mark = createMark(tarLoc, temp.get(name));
+            pl.removeMetadata("menu", get());
+            saveTemplate(pl.getName(), mark);
         }
     }
 
@@ -40,12 +63,8 @@ public class PlayerInteractEvent implements Listener {
         ItemStack item = pl.getItemInHand();
         if (item.getType() != Material.LIGHTNING_ROD) return;
 
-        if (pl.isSneaking()) {
+        if (!pl.isSneaking()) {
             pl.setMetadata("sneak", new FixedMetadataValue(get(), true));
-            pl.setSneaking(true);
-        } else {
-            pl.setMetadata("sneak", new FixedMetadataValue(get(), true));
-            pl.setSneaking(true);
 
             menuInit(
                     pl,
@@ -74,32 +93,6 @@ public class PlayerInteractEvent implements Listener {
             2, menuBuild::menu,
             3, menuPrint::menu
     );
-
-    static ConcurrentHashMap<String, Location> temp = new ConcurrentHashMap<>();
-
-    @EventHandler
-    public void onPlayerClickAtBlock(org.bukkit.event.player.PlayerInteractEvent event) {
-        Player pl = event.getPlayer();
-
-        if (!pl.hasMetadata("menu")) return;
-
-        ItemStack item = pl.getItemInHand();
-        if (item.getType() != Material.LIGHTNING_ROD) return;
-
-        String name = pl.getName();
-        Location tarLoc = event.getClickedBlock().getLocation();
-        if (!temp.containsKey(name)) {
-            temp.put(name, tarLoc);
-            title(pl, "[还差一角]", "已记录点A 还需要第二个角落");
-            return;
-        }
-
-        title(pl, "[已记录点B]", "现在你可以在§b[所有模板]§f中使用该模板");
-
-        Pair<Location, List<Mark>> mark = createMark(tarLoc, temp.get(name));
-        pl.removeMetadata("menu", get());
-        saveTemplate(pl.getName(), mark);
-    }
 
     @EventHandler
     public void onPlayerPlace(BlockPlaceEvent event) {

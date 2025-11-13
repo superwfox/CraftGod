@@ -12,7 +12,9 @@ import sudark2.Sudark.craftGod.Mark;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static sudark2.Sudark.craftGod.CraftGod.get;
 
@@ -29,12 +31,15 @@ public class FileManager {
     }
 
     public static void saveTemplate(String templateName, Pair<Location, List<Mark>> markPair) {
+        File templateFile = new File(templateFolder, templateName + ".yml");
+        while(templateFile.exists()) {
+            templateName += "-";
+            templateFile = new File(templateFolder, templateName + ".yml");
+        }
 
         Location startLoc = markPair.left();
         List<Mark> marks = markPair.right();
 
-        // 1. 创建文件对象
-        File templateFile = new File(templateFolder, templateName + ".yml");
         YamlConfiguration config = new YamlConfiguration();
         // 存储绝对起始坐标
         config.set("start.x", startLoc.getBlockX());
@@ -106,5 +111,19 @@ public class FileManager {
         }
 
         return Pair.of(startLoc, marks);
+    }
+
+    public static List<String> loadAllTemplateNames() {
+        File[] allEntries = templateFolder.listFiles();
+
+        if (allEntries == null) {
+            return new ArrayList<>();
+        }
+
+        // 使用 Stream API 过滤出文件并提取文件名
+        return Arrays.stream(allEntries)
+                .filter(File::isFile) // 过滤掉子目录
+                .map(File::getName)   // 提取文件名
+                .collect(Collectors.toList());
     }
 }

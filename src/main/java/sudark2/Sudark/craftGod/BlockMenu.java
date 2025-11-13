@@ -1,5 +1,6 @@
 package sudark2.Sudark.craftGod;
 
+import it.unimi.dsi.fastutil.Pair;
 import org.bukkit.*;
 import org.bukkit.entity.BlockDisplay;
 import org.bukkit.entity.Player;
@@ -18,6 +19,7 @@ import java.util.concurrent.CompletableFuture;
 
 import static sudark2.Sudark.craftGod.CraftGod.displays;
 import static sudark2.Sudark.craftGod.CraftGod.get;
+import static sudark2.Sudark.craftGod.menus.FileManager.loadTemplate;
 
 public class BlockMenu {
     // 1 创造 2 打印他人的投影 3 建造 4 从建筑码获取投影 5 显示距离调整
@@ -32,7 +34,7 @@ public class BlockMenu {
         return item;
     }
 
-    public static CompletableFuture<Integer> menuInit(Player p, List<BlockDisplay> choices){
+    public static CompletableFuture<Integer> menuInit(Player p, List<BlockDisplay> choices) {
         // 1. 创建 CompletableFuture 实例
         CompletableFuture<Integer> futureIndex = new CompletableFuture<>();
 
@@ -81,7 +83,7 @@ public class BlockMenu {
                 }
 
                 // --- 选中逻辑 (潜行触发) ---
-                if (!p.hasMetadata("sneak")) return;
+                if (!p.hasMetadata("sneak") && !p.hasMetadata("click")) return;
 
                 if (bl != null) {
                     Integer index = bl.getPersistentDataContainer().get(MENU_INDEX_KEY, PersistentDataType.INTEGER);
@@ -96,7 +98,7 @@ public class BlockMenu {
                 }
                 p.removeMetadata("sneak", get());
                 if (!futureIndex.isDone()) {
-                    futureIndex.complete(-2);
+                    futureIndex.complete(-1);
                 }
                 menuFadeout(choices);
                 cancel();
@@ -109,15 +111,15 @@ public class BlockMenu {
     static float p = 5.5f * 0.125f;
     public static Transformation normal = new Transformation(
             new Vector3f(-p / 2f, -0.5f, -p / 2f),
-            new Quaternionf().rotateY(-180),
+            new Quaternionf(),
             new Vector3f(p, p, p),
             new Quaternionf()
     );
 
     static float lp = 7 * 0.125f;
     public static Transformation huge = new Transformation(
-            new Vector3f(-lp / 2f, -0.5625f, -lp / 2f),
-            new Quaternionf().rotateY(30),
+            new Vector3f(lp / 2f, -0.5625f, lp / 2f),
+            new Quaternionf().rotateY(180),
             new Vector3f(lp, lp, lp),
             new Quaternionf()
     );
@@ -209,8 +211,7 @@ public class BlockMenu {
                         , 2);
 
                 flag.getPersistentDataContainer().set(
-                        new NamespacedKey(get(), "index"), PersistentDataType.INTEGER,
-                        i // 存储当前的循环索引
+                        MENU_INDEX_KEY, PersistentDataType.INTEGER, i
                 );
 
                 blockDisplays.add(flag);
@@ -231,25 +232,48 @@ public class BlockMenu {
                     .add(right.clone().multiply(offset));
 
             Location loc = plLoc.clone().add(offsetVec).add(0, -1.5f, 0);
-            BlockDisplay flag = world.spawn(loc, BlockDisplay.class);
 
-            flag.setBlock(item.getType().createBlockData());
+            final int index = i;
+            Bukkit.getScheduler().runTask(get(), () -> {
+                BlockDisplay flag = world.spawn(loc, BlockDisplay.class);
 
-            flag.setCustomName("[§e" + name + "§f]");
+                flag.setBlock(item.getType().createBlockData());
 
-            flag.setTransformation(normal);
-            flag.setInterpolationDelay(0);
-            flag.setInterpolationDuration(5);
-            flag.setTeleportDuration(5);
-            Bukkit.getScheduler().runTaskLater(get(), () ->
-                            flag.teleport(flag.getLocation().add(0, 2, 0))
-                    , 2);
+                flag.setCustomName("[§e" + name + "§f]");
 
-            blockDisplays.add(flag);
-            displays.add(flag);
+                flag.setTransformation(normal);
+                flag.setInterpolationDelay(0);
+                flag.setInterpolationDuration(5);
+                flag.setTeleportDuration(5);
+                Bukkit.getScheduler().runTaskLater(get(), () ->
+                                flag.teleport(flag.getLocation().add(0, 3, 0))
+                        , 2);
+
+                flag.getPersistentDataContainer().set(
+                        MENU_INDEX_KEY, PersistentDataType.INTEGER, index
+                );
+
+                blockDisplays.add(flag);
+                displays.add(flag);
+            });
+
         }
         return blockDisplays;
 
+    }
+
+
+    public static List<BlockDisplay> spawnCreature(int moveX, int moveZ, List<Mark> marks, Player pl, int dx, int dz, World world) {
+        Location startLoc = pl.getLocation().add(moveX, 0, moveZ);
+        List<BlockDisplay> marksPlaced = new ArrayList<>();
+        for (Mark mark : marks) {
+            Location loc = startLoc.clone().add(dx * mark.getDx(), mark.getDy(), dz * mark.getDz());
+            BlockDisplay display = world.spawn(loc, BlockDisplay.class);
+            display.setBlock(mark.getData());
+            displays.add(display);
+            marksPlaced.add(display);
+        }
+        return marksPlaced;
     }
 
     public static void menuFadeout(List<BlockDisplay> choices) {

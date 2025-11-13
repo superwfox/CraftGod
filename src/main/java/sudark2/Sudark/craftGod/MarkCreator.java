@@ -21,10 +21,13 @@ public class MarkCreator {
         int maxY = Math.max(start.getBlockY(), end.getBlockY());
         World world = start.getWorld();
 
-        for (int x = minX; x <= maxX; x++)
-            for (int y = minY; y <= maxY; y++)
-                for (int z = minZ; z <= maxZ; z++) {
-                    Block block = world.getBlockAt(x, y, z);
+        int length = maxX - minX + 1;
+        int width = maxZ - minZ + 1;
+        int height = maxY - minY + 1;
+        for (int x = 0; x <= length; x++)
+            for (int y = 0; y <= width; y++)
+                for (int z = 0; z <= height; z++) {
+                    Block block = world.getBlockAt(minX + x, minY + y, minZ + z);
 
                     if (block.getType() == Material.AIR) continue;
                     Mark mark = new Mark(x, y, z, block.getBlockData());

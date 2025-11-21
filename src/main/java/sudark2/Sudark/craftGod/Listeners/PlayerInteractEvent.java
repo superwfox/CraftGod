@@ -1,4 +1,4 @@
-package sudark2.Sudark.craftGod;
+package sudark2.Sudark.craftGod.Listeners;
 
 import it.unimi.dsi.fastutil.Pair;
 import org.bukkit.Bukkit;
@@ -11,7 +11,8 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
-import sudark2.Sudark.craftGod.menus.*;
+import sudark2.Sudark.craftGod.Mark.Mark;
+import sudark2.Sudark.craftGod.Menus.*;
 
 import java.util.List;
 import java.util.Map;
@@ -20,8 +21,8 @@ import java.util.function.Consumer;
 
 import static sudark2.Sudark.craftGod.BlockMenu.*;
 import static sudark2.Sudark.craftGod.CraftGod.get;
-import static sudark2.Sudark.craftGod.MarkCreator.createMark;
-import static sudark2.Sudark.craftGod.menus.FileManager.saveTemplate;
+import static sudark2.Sudark.craftGod.Mark.MarkCreator.createMark;
+import static sudark2.Sudark.craftGod.Menus.FileManager.saveTemplate;
 
 public class PlayerInteractEvent implements Listener {
 
@@ -65,18 +66,17 @@ public class PlayerInteractEvent implements Listener {
 
         if (!pl.isSneaking()) {
             pl.setMetadata("sneak", new FixedMetadataValue(get(), true));
+            Bukkit.getScheduler().runTaskLater(get(), () -> pl.removeMetadata("sneak", get()), 5);
 
             menuInit(
                     pl,
                     spawnMenu(
                             List.of(
                                     nameItem(Material.SCULK_SHRIEKER, "创造"),
-                                    nameItem(Material.BEDROCK, "打印他人的投影"),
-                                    nameItem(Material.AMETHYST_CLUSTER, "建造"),
-                                    nameItem(Material.BEACON, "从建筑码获取投影")
+                                    nameItem(Material.BREWING_STAND, "建造"),
+                                    nameItem(Material.SOUL_CAMPFIRE, "从建筑码获取投影")
                             ),
-                            pl,
-                            1
+                            pl
                     )
             ).thenAccept(index -> {
                 if (index == -1) return;

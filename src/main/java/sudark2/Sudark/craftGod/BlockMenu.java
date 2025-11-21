@@ -1,6 +1,5 @@
 package sudark2.Sudark.craftGod;
 
-import it.unimi.dsi.fastutil.Pair;
 import org.bukkit.*;
 import org.bukkit.entity.BlockDisplay;
 import org.bukkit.entity.Player;
@@ -12,6 +11,7 @@ import org.bukkit.util.Transformation;
 import org.bukkit.util.Vector;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
+import sudark2.Sudark.craftGod.Mark.Mark;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +19,6 @@ import java.util.concurrent.CompletableFuture;
 
 import static sudark2.Sudark.craftGod.CraftGod.displays;
 import static sudark2.Sudark.craftGod.CraftGod.get;
-import static sudark2.Sudark.craftGod.menus.FileManager.loadTemplate;
 
 public class BlockMenu {
     // 1 创造 2 打印他人的投影 3 建造 4 从建筑码获取投影 5 显示距离调整
@@ -43,7 +42,7 @@ public class BlockMenu {
 
         new BukkitRunnable() {
             Location centerLoc = p.getLocation();
-            int distanceSquared = (choices.size() + 2) * (choices.size() + 2);
+            int distanceSquared = (choices.size() + 10) * (choices.size() + 10);
             int time = 0;
 
             @Override
@@ -70,7 +69,6 @@ public class BlockMenu {
                     return;
                 }
 
-                // --- 目标检测与高亮 ---
                 BlockDisplay bl = getTarget(p, choices);
 
                 for (BlockDisplay display : choices) {
@@ -82,8 +80,15 @@ public class BlockMenu {
                     rotate(display);
                 }
 
-                // --- 选中逻辑 (潜行触发) ---
-                if (!p.hasMetadata("sneak") && !p.hasMetadata("click")) return;
+                if (bl != null)
+                    bl.getWorld().spawnParticle(
+                            Particle.DUST_COLOR_TRANSITION,
+                            bl.getLocation(),
+                            1, // 粒子的数量
+                            new Particle.DustTransition(Color.YELLOW, Color.ORANGE, 1.5f)
+                    );
+
+                if (!p.hasMetadata("click")) return;
 
                 if (bl != null) {
                     Integer index = bl.getPersistentDataContainer().get(MENU_INDEX_KEY, PersistentDataType.INTEGER);
@@ -91,19 +96,19 @@ public class BlockMenu {
                     if (index != null && !futureIndex.isDone()) {
                         futureIndex.complete(index);
                     }
-                    p.removeMetadata("sneak", get());
+                    Bukkit.getScheduler().runTask(get(), () -> p.teleport(centerLoc));
                     menuFadeout(choices);
                     cancel();
                     return;
                 }
-                p.removeMetadata("sneak", get());
+
                 if (!futureIndex.isDone()) {
                     futureIndex.complete(-1);
                 }
                 menuFadeout(choices);
                 cancel();
             }
-        }.runTaskTimerAsynchronously(get(), 7, 2);
+        }.runTaskTimerAsynchronously(get(), 8, 2);
 
         return futureIndex;
     }
@@ -116,10 +121,10 @@ public class BlockMenu {
             new Quaternionf()
     );
 
-    static float lp = 7 * 0.125f;
+    static float lp = 6 * 0.125f;
     public static Transformation huge = new Transformation(
-            new Vector3f(lp / 2f, -0.5625f, lp / 2f),
-            new Quaternionf().rotateY(180),
+            new Vector3f(-lp / 2, -0.5625f, -lp / 2),
+            new Quaternionf(),
             new Vector3f(lp, lp, lp),
             new Quaternionf()
     );
@@ -176,50 +181,16 @@ public class BlockMenu {
     }
 
 
-    public static List<BlockDisplay> spawnMenu(List<ItemStack> blocks, Player pl, int mode) {
+    public static List<BlockDisplay> spawnMenu(List<ItemStack> blocks, Player pl) {
         Location plLoc = pl.getLocation();
         World world = plLoc.getWorld();
         Vector forward = plLoc.getDirection().setY(0); // 玩家朝向
         Vector right = new Vector(-forward.getZ(), 0, forward.getX()); // 玩家右侧方向
-        Vector up = new Vector(0, 1, 0); // 玩家上方方向
         plLoc.setPitch(0);
         int size = blocks.size();
-        int spacing = 1;
+        float spacing = 1.25f;
 
         List<BlockDisplay> blockDisplays = new ArrayList<>();
-        if (mode == 1) {
-            for (int i = 0; i < size; i++) {
-                int parallel = i % 2 == 0 ? 1 : -1;
-                int vertical = i / 2;
-                Vector offset = forward.clone().multiply(2.25)
-                        .add(up.clone().multiply(vertical * 1.5))
-                        .add(right.clone().multiply(parallel * spacing));
-
-                Location loc = plLoc.clone().add(offset).add(0, -1.5f, 0);
-                BlockDisplay flag = world.spawn(loc, BlockDisplay.class);
-
-                flag.setBlock(blocks.get(i).getType().createBlockData());
-
-                flag.setCustomName("[§e" + blocks.get(i).getItemMeta().getDisplayName() + "§f]");
-
-                flag.setTransformation(normal);
-                flag.setInterpolationDelay(0);
-                flag.setInterpolationDuration(5);
-                flag.setTeleportDuration(5);
-                Bukkit.getScheduler().runTaskLater(get(), () ->
-                                flag.teleport(flag.getLocation().add(0, 2, 0))
-                        , 2);
-
-                flag.getPersistentDataContainer().set(
-                        MENU_INDEX_KEY, PersistentDataType.INTEGER, i
-                );
-
-                blockDisplays.add(flag);
-                displays.add(flag);
-            }
-            return blockDisplays;
-        }
-
         double center = (size - 1) / 2.0;
 
         for (int i = 0; i < size; i++) {
@@ -231,7 +202,7 @@ public class BlockMenu {
             Vector offsetVec = forward.clone().multiply(2.5)
                     .add(right.clone().multiply(offset));
 
-            Location loc = plLoc.clone().add(offsetVec).add(0, -1.5f, 0);
+            Location loc = plLoc.clone().add(offsetVec).add(0, -1.5, 0);
 
             final int index = i;
             Bukkit.getScheduler().runTask(get(), () -> {
@@ -246,7 +217,7 @@ public class BlockMenu {
                 flag.setInterpolationDuration(5);
                 flag.setTeleportDuration(5);
                 Bukkit.getScheduler().runTaskLater(get(), () ->
-                                flag.teleport(flag.getLocation().add(0, 3, 0))
+                                flag.teleport(flag.getLocation().add(0, 2.75, 0))
                         , 2);
 
                 flag.getPersistentDataContainer().set(
@@ -264,15 +235,17 @@ public class BlockMenu {
 
 
     public static List<BlockDisplay> spawnCreature(int moveX, int moveZ, List<Mark> marks, Player pl, int dx, int dz, World world) {
-        Location startLoc = pl.getLocation().add(moveX, 0, moveZ);
+        Location startLoc = pl.getLocation().getBlock().getLocation().add(moveX, 0, moveZ);
         List<BlockDisplay> marksPlaced = new ArrayList<>();
-        for (Mark mark : marks) {
-            Location loc = startLoc.clone().add(dx * mark.getDx(), mark.getDy(), dz * mark.getDz());
-            BlockDisplay display = world.spawn(loc, BlockDisplay.class);
-            display.setBlock(mark.getData());
-            displays.add(display);
-            marksPlaced.add(display);
-        }
+        Bukkit.getScheduler().runTask(get(), () -> {
+            for (Mark mark : marks) {
+                Location loc = startLoc.clone().add(dx * mark.getDx(), mark.getDy(), dz * mark.getDz());
+                BlockDisplay display = world.spawn(loc, BlockDisplay.class);
+                display.setBlock(mark.getData());
+                displays.add(display);
+                marksPlaced.add(display);
+            }
+        });
         return marksPlaced;
     }
 

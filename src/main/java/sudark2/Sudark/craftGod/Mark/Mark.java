@@ -1,6 +1,5 @@
-package sudark2.Sudark.craftGod;
+package sudark2.Sudark.craftGod.Mark;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.BlockDisplay;
@@ -19,11 +18,15 @@ public class Mark {
         this.data = data;
     }
 
-    public void markDisplay(List<Mark> marks, Location loc) {
+    public static void markDisplay(List<Mark> marks, Location loc) {
         for (Mark mark : marks) {
-           BlockDisplay block = (BlockDisplay) loc.getWorld().spawnEntity(loc.add(mark.getDx(), mark.getDy(), mark.getDz()),EntityType.BLOCK_DISPLAY);
+           BlockDisplay block = (BlockDisplay) loc.getWorld().spawnEntity(loc.clone().add(mark.getDx(), mark.getDy(), mark.getDz()),EntityType.BLOCK_DISPLAY);
             block.setBlock(mark.getData());
         }
+    }
+
+    public int[] getLoc() {
+        return new int[] {dx,dy,dz};
     }
 
     public int getDx() {

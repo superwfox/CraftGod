@@ -1,4 +1,4 @@
-package sudark2.Sudark.craftGod.menus;
+package sudark2.Sudark.craftGod.Menus;
 
 import it.unimi.dsi.fastutil.Pair;
 import org.bukkit.Bukkit;
@@ -7,7 +7,7 @@ import org.bukkit.World;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
-import sudark2.Sudark.craftGod.Mark;
+import sudark2.Sudark.craftGod.Mark.Mark;
 
 import java.io.File;
 import java.io.IOException;
@@ -71,7 +71,7 @@ public class FileManager {
 
     public static Pair<Location, List<Mark>> loadTemplate(String templateName, World targetWorld) {
         // 1. 检查文件是否存在
-        File templateFile = new File(templateFolder, templateName + ".yml");
+        File templateFile = new File(templateFolder, templateName);
         if (!templateFile.exists()) {
             System.err.println("模板文件不存在: " + templateName);
             return null;

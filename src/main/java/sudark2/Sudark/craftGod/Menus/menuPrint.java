@@ -1,4 +1,4 @@
-package sudark2.Sudark.craftGod.menus;
+package sudark2.Sudark.craftGod.Menus;
 
 import org.bukkit.entity.Player;
 

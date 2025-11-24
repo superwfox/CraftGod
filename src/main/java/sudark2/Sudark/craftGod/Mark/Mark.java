@@ -4,6 +4,9 @@ import org.bukkit.Location;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.BlockDisplay;
 import org.bukkit.entity.EntityType;
+import org.bukkit.util.Transformation;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
 import java.util.List;
 
@@ -20,13 +23,22 @@ public class Mark {
 
     public static void markDisplay(List<Mark> marks, Location loc) {
         for (Mark mark : marks) {
-           BlockDisplay block = (BlockDisplay) loc.getWorld().spawnEntity(loc.clone().add(mark.getDx(), mark.getDy(), mark.getDz()),EntityType.BLOCK_DISPLAY);
+            BlockDisplay block = (BlockDisplay) loc.getWorld().spawnEntity(loc.clone().add(mark.getDx(), mark.getDy(), mark.getDz()), EntityType.BLOCK_DISPLAY);
             block.setBlock(mark.getData());
+            block.setTransformation(x0of8);
         }
     }
 
+    static float length = 0.875f;//0.0625 x 14
+    static Transformation x0of8 = new Transformation(
+            new Vector3f(0.0625f, 0.0625f, 0.0625f),
+            new Quaternionf(),
+            new Vector3f(length, length, length),
+            new Quaternionf()
+    );
+
     public int[] getLoc() {
-        return new int[] {dx,dy,dz};
+        return new int[]{dx, dy, dz};
     }
 
     public int getDx() {

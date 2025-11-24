@@ -37,9 +37,6 @@ public class BlockMenu {
         // 1. 创建 CompletableFuture 实例
         CompletableFuture<Integer> futureIndex = new CompletableFuture<>();
 
-        // 确保移除旧的元数据
-        p.removeMetadata("sneak", get());
-
         new BukkitRunnable() {
             Location centerLoc = p.getLocation();
             int distanceSquared = (choices.size() + 10) * (choices.size() + 10);
@@ -80,23 +77,23 @@ public class BlockMenu {
                     rotate(display);
                 }
 
-                if (bl != null)
-                    bl.getWorld().spawnParticle(
-                            Particle.DUST_COLOR_TRANSITION,
-                            bl.getLocation(),
-                            1, // 粒子的数量
-                            new Particle.DustTransition(Color.YELLOW, Color.ORANGE, 1.5f)
-                    );
+                if (bl != null) bl.getWorld().spawnParticle(
+                        Particle.DUST_COLOR_TRANSITION,
+                        bl.getLocation(),
+                        1, // 粒子的数量
+                        new Particle.DustTransition(Color.YELLOW, Color.ORANGE, 1.5f)
+                );
 
                 if (!p.hasMetadata("click")) return;
 
                 if (bl != null) {
+                    Bukkit.getScheduler().runTask(get(), () -> p.teleport(centerLoc));//复位 保证玩家下次菜单位置正确
                     Integer index = bl.getPersistentDataContainer().get(MENU_INDEX_KEY, PersistentDataType.INTEGER);
 
                     if (index != null && !futureIndex.isDone()) {
+                        p.playSound(bl.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1, 1);
                         futureIndex.complete(index);
                     }
-                    Bukkit.getScheduler().runTask(get(), () -> p.teleport(centerLoc));
                     menuFadeout(choices);
                     cancel();
                     return;

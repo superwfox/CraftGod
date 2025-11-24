@@ -8,7 +8,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
-import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
 import sudark2.Sudark.craftGod.Mark.Mark;
@@ -24,7 +23,7 @@ import static sudark2.Sudark.craftGod.CraftGod.get;
 import static sudark2.Sudark.craftGod.Mark.MarkCreator.createMark;
 import static sudark2.Sudark.craftGod.Menus.FileManager.saveTemplate;
 
-public class PlayerInteractEvent implements Listener {
+public class MenuHandler implements Listener {
 
     static ConcurrentHashMap<String, Location> temp = new ConcurrentHashMap<>();
 
@@ -35,7 +34,7 @@ public class PlayerInteractEvent implements Listener {
 
         if (ac.equals(Action.LEFT_CLICK_AIR) || ac.equals(Action.LEFT_CLICK_BLOCK)) {
             pl.setMetadata("click", new FixedMetadataValue(get(), true));
-            Bukkit.getScheduler().runTaskLater(get(), () -> pl.removeMetadata("click", get()), 5);
+            Bukkit.getScheduler().runTaskLater(get(), () -> pl.removeMetadata("click", get()), 3);
 
             if (!pl.hasMetadata("menu")) return;
 
@@ -59,19 +58,17 @@ public class PlayerInteractEvent implements Listener {
     }
 
     @EventHandler
-    public void onPlayerClickAtBlock(org.bukkit.event.player.PlayerToggleSneakEvent event) {
+    public void onMenuInit(org.bukkit.event.player.PlayerToggleSneakEvent event) {
         Player pl = event.getPlayer();
         ItemStack item = pl.getItemInHand();
         if (item.getType() != Material.LIGHTNING_ROD) return;
 
         if (!pl.isSneaking()) {
             pl.setMetadata("sneak", new FixedMetadataValue(get(), true));
-            Bukkit.getScheduler().runTaskLater(get(), () -> pl.removeMetadata("sneak", get()), 5);
+            Bukkit.getScheduler().runTaskLater(get(), () -> pl.removeMetadata("sneak", get()), 3);
 
             menuInit(
-                    pl,
-                    spawnMenu(
-                            List.of(
+                    pl, spawnMenu(List.of(
                                     nameItem(Material.SCULK_SHRIEKER, "创造"),
                                     nameItem(Material.BREWING_STAND, "建造"),
                                     nameItem(Material.SOUL_CAMPFIRE, "从建筑码获取投影")
@@ -94,8 +91,4 @@ public class PlayerInteractEvent implements Listener {
             3, menuPrint::menu
     );
 
-    @EventHandler
-    public void onPlayerPlace(BlockPlaceEvent event) {
-
-    }
 }

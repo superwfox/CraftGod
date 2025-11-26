@@ -6,7 +6,6 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import sudark2.Sudark.craftGod.Listeners.BuildingCreate;
 import sudark2.Sudark.craftGod.Listeners.MenuHandler;
-import sudark2.Sudark.craftGod.Menus.FileManager;
 
 import java.util.ArrayList;
 import java.util.List;

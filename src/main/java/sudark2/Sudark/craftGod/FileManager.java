@@ -1,4 +1,4 @@
-package sudark2.Sudark.craftGod.Menus;
+package sudark2.Sudark.craftGod;
 
 import it.unimi.dsi.fastutil.Pair;
 import org.bukkit.Bukkit;
@@ -119,8 +119,6 @@ public class FileManager {
         if (allEntries == null) {
             return new ArrayList<>();
         }
-
-        // 使用 Stream API 过滤出文件并提取文件名
         return Arrays.stream(allEntries)
                 .filter(File::isFile) // 过滤掉子目录
                 .map(File::getName)   // 提取文件名

@@ -16,8 +16,8 @@ import java.util.function.Consumer;
 import static sudark2.Sudark.craftGod.BlockMenu.*;
 import static sudark2.Sudark.craftGod.Listeners.BuildingCreate.BuildingTemplate;
 import static sudark2.Sudark.craftGod.CraftGod.get;
-import static sudark2.Sudark.craftGod.Menus.FileManager.loadAllTemplateNames;
-import static sudark2.Sudark.craftGod.Menus.FileManager.loadTemplate;
+import static sudark2.Sudark.craftGod.FileManager.loadAllTemplateNames;
+import static sudark2.Sudark.craftGod.FileManager.loadTemplate;
 
 public class menuCreate {
 

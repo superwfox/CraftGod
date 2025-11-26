@@ -21,7 +21,7 @@ import java.util.function.Consumer;
 import static sudark2.Sudark.craftGod.BlockMenu.*;
 import static sudark2.Sudark.craftGod.CraftGod.get;
 import static sudark2.Sudark.craftGod.Mark.MarkCreator.createMark;
-import static sudark2.Sudark.craftGod.Menus.FileManager.saveTemplate;
+import static sudark2.Sudark.craftGod.FileManager.saveTemplate;
 
 public class MenuHandler implements Listener {
 
@@ -86,9 +86,8 @@ public class MenuHandler implements Listener {
 
     private final Map<Integer, Consumer<Player>> menuActions = Map.of(
             0, menuCreate::menu,
-            1, menuReflect::menu,
-            2, menuBuild::menu,
-            3, menuPrint::menu
+            1, menuPrint::menu,
+            2, menuReflect::menu
     );
 
 }

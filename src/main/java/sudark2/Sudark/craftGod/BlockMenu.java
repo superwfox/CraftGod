@@ -11,7 +11,6 @@ import org.bukkit.util.Transformation;
 import org.bukkit.util.Vector;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
-import sudark2.Sudark.craftGod.Mark.Mark;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,7 +51,7 @@ public class BlockMenu {
                         futureIndex.complete(-1);
                     }
                     title(p, "[§e弃选]", "时间超过5分钟-自动为您弃选");
-                    menuFadeout(choices);
+                    menuFadeout(choices,p);
                     cancel();
                     return;
                 }
@@ -61,7 +60,7 @@ public class BlockMenu {
                     if (!futureIndex.isDone()) {
                         futureIndex.complete(-1);
                     }
-                    menuFadeout(choices);
+                    menuFadeout(choices,p);
                     cancel();
                     return;
                 }
@@ -87,14 +86,13 @@ public class BlockMenu {
                 if (!p.hasMetadata("click")) return;
 
                 if (bl != null) {
-                    Bukkit.getScheduler().runTask(get(), () -> p.teleport(centerLoc));//复位 保证玩家下次菜单位置正确
                     Integer index = bl.getPersistentDataContainer().get(MENU_INDEX_KEY, PersistentDataType.INTEGER);
 
                     if (index != null && !futureIndex.isDone()) {
                         p.playSound(bl.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1, 1);
                         futureIndex.complete(index);
                     }
-                    menuFadeout(choices);
+                    menuFadeout(choices,p);
                     cancel();
                     return;
                 }
@@ -102,7 +100,7 @@ public class BlockMenu {
                 if (!futureIndex.isDone()) {
                     futureIndex.complete(-1);
                 }
-                menuFadeout(choices);
+                menuFadeout(choices,p);
                 cancel();
             }
         }.runTaskTimerAsynchronously(get(), 8, 2);
@@ -221,6 +219,7 @@ public class BlockMenu {
                         MENU_INDEX_KEY, PersistentDataType.INTEGER, index
                 );
 
+                pl.playSound(pl, Sound.BLOCK_BEEHIVE_ENTER, 1, 1);
                 blockDisplays.add(flag);
                 displays.add(flag);
             });
@@ -231,22 +230,7 @@ public class BlockMenu {
     }
 
 
-    public static List<BlockDisplay> spawnCreature(int moveX, int moveZ, List<Mark> marks, Player pl, int dx, int dz, World world) {
-        Location startLoc = pl.getLocation().getBlock().getLocation().add(moveX, 0, moveZ);
-        List<BlockDisplay> marksPlaced = new ArrayList<>();
-        Bukkit.getScheduler().runTask(get(), () -> {
-            for (Mark mark : marks) {
-                Location loc = startLoc.clone().add(dx * mark.getDx(), mark.getDy(), dz * mark.getDz());
-                BlockDisplay display = world.spawn(loc, BlockDisplay.class);
-                display.setBlock(mark.getData());
-                displays.add(display);
-                marksPlaced.add(display);
-            }
-        });
-        return marksPlaced;
-    }
-
-    public static void menuFadeout(List<BlockDisplay> choices) {
+    public static void menuFadeout(List<BlockDisplay> choices,Player pl) {
         new BukkitRunnable() {
             @Override
             public void run() {
@@ -261,6 +245,7 @@ public class BlockMenu {
                 display.setTeleportDuration(5);
                 display.teleport(display.getLocation().add(0, -3, 0));
                 Bukkit.getScheduler().runTaskLater(get(), () -> display.remove(), 5);
+                pl.playSound(pl, Sound.BLOCK_BEEHIVE_ENTER, 1, 1);
                 choices.remove(display);
             }
         }.runTaskTimer(get(), 0, 2);

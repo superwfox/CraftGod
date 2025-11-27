@@ -8,6 +8,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
 import sudark2.Sudark.craftGod.Mark.Mark;
+import sudark2.Sudark.craftGod.Menus.createMenus.circleSpawner;
+import sudark2.Sudark.craftGod.Menus.createMenus.linerSpawner;
+import sudark2.Sudark.craftGod.Menus.createMenus.romanColumnSpawner;
 
 import java.util.List;
 import java.util.Map;
@@ -18,6 +21,7 @@ import static sudark2.Sudark.craftGod.Listeners.BuildingCreate.BuildingTemplate;
 import static sudark2.Sudark.craftGod.CraftGod.get;
 import static sudark2.Sudark.craftGod.FileManager.loadAllTemplateNames;
 import static sudark2.Sudark.craftGod.FileManager.loadTemplate;
+import static sudark2.Sudark.craftGod.Menus.createMenus.menuController.*;
 
 public class menuCreate {
 
@@ -30,9 +34,9 @@ public class menuCreate {
     );
 
     private static final Map<Integer, Consumer<Player>> menuActions = Map.of(
-            0, menuCreate::pillar,
-            1, menuCreate::liner,
-            2, menuCreate::circle,
+            0, romanColumnSpawner::menu,
+            1, linerSpawner::menu,
+            2, circleSpawner::menu,
             3, menuCreate::other,
             4, menuCreate::create
     );
@@ -48,64 +52,30 @@ public class menuCreate {
         );
     }
 
-    public static void pillar(Player p) {
-
-    }
-
-    public static void liner(Player p) {
-
-    }
-
-    public static void circle(Player p) {
-
-    }
-
-    static int[][] directions = {
-            {-1, 1}, {1, -1}, {1, -1}, {-1, 1}//z+ x+ x- z-
-    };
-
-    static int[][] faces = {
-            {0, 5}, {5, 0}, {0, -5}, {-5, 0}//z+ x+ x- z-
-    };
-
     public static void other(Player p) {
         if (loadAllTemplateNames().isEmpty()) {
             title(p, "[没有模板]", "请先§e创建模板");
             return;
         }
-        float yaw = p.getYaw();
-
-        World world = p.getWorld();
-        int index;
-
-        if (yaw < 135 && yaw > 45) index = 3;
-        else if (yaw <= 45 && yaw > -45) index = 0;
-        else if (yaw <= -45 && yaw > -135) index = 1;
-        else index = 2;
-
-        int[] selectedDirection = directions[index];
-        int dx = selectedDirection[0];
-        int dz = selectedDirection[1];
-        int moveX = faces[index][0];
-        int moveZ = faces[index][1];
-        temMenu(p, 0, world, moveX, moveZ, dx, dz);
+        temMenu(p, 0);
     }
-
 
     public static void create(Player p) {
         p.setMetadata("menu", new FixedMetadataValue(get(), true));
         title(p, "[创造模板]", "使用避雷针左键方块确定模板");
     }
 
-    public static void temMenu(Player p, int order, World world, int moveX, int moveZ, int dx, int dz) {
+    public static void temMenu(Player p, int order) {
         List<String> names = loadAllTemplateNames();
         String nameNow = names.get(order);
+        World world = p.getWorld();
+
         List<Mark> marks = loadTemplate(nameNow, world).right();
         final int N = names.size();
 
         String nextName = names.get((order + 1) % N);
         String previousName = names.get((order + N - 1) % N);
-        List<BlockDisplay> preview = spawnCreature(moveX, moveZ, marks, p, dx, dz, world);
+        List<BlockDisplay> preview = displayTemplate(p, marks);
 
         menuInit(p, spawnMenu(List.of(
                 nameItem(Material.OXIDIZED_COPPER_GRATE, previousName),
@@ -113,12 +83,11 @@ public class menuCreate {
                 nameItem(Material.WEATHERED_COPPER_GRATE, nextName)
         ), p)).thenAccept(
                 in -> {
-                    System.out.println(in);
                     if (in == -1) return;
                     switch (in) {
                         case 0 -> {
                             Bukkit.getScheduler().runTask(get(), () -> preview.forEach(BlockDisplay::remove));
-                            temMenu(p, (order + N - 1) % N, world, moveX, moveZ, dx, dz);
+                            temMenu(p, (order + N - 1) % N);
                         }
                         case 1 -> {
                             Bukkit.getScheduler().runTask(get(), () -> preview.forEach(BlockDisplay::remove));
@@ -126,7 +95,7 @@ public class menuCreate {
                         }
                         case 2 -> {
                             Bukkit.getScheduler().runTask(get(), () -> preview.forEach(BlockDisplay::remove));
-                            temMenu(p, (order + 1) % N, world, moveX, moveZ, dx, dz);
+                            temMenu(p, (order + 1) % N);
                         }
                     }
                 });

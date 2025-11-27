@@ -12,7 +12,7 @@ import java.util.List;
 
 public final class CraftGod extends JavaPlugin {
 
-    static List<BlockDisplay> displays = new ArrayList<>();
+    public static List<BlockDisplay> displays = new ArrayList<>();
 
     @Override
     public void onEnable() {

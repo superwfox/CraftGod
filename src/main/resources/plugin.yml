@@ -2,3 +2,8 @@ name: CraftGod
 version: '8'
 main: sudark2.Sudark.craftGod.CraftGod
 api-version: '1.21'
+commands:
+  craftgod:
+    description: CraftGod
+    usage: /<command>
+    aliases: ["god"]

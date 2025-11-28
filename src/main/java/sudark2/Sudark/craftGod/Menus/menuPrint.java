@@ -7,4 +7,5 @@ public class menuPrint {
     public static void menu(Player p) {
 
     }
+
 }

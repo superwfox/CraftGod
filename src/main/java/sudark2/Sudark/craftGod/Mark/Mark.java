@@ -8,6 +8,7 @@ import org.bukkit.util.Transformation;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Mark {
@@ -21,12 +22,15 @@ public class Mark {
         this.data = data;
     }
 
-    public static void markDisplay(List<Mark> marks, Location loc) {
+    public static List<BlockDisplay> markDisplay(List<Mark> marks, Location loc) {
+        List<BlockDisplay> blockDisplays = new ArrayList<>();
         for (Mark mark : marks) {
             BlockDisplay block = (BlockDisplay) loc.getWorld().spawnEntity(loc.clone().add(mark.getDx(), mark.getDy(), mark.getDz()), EntityType.BLOCK_DISPLAY);
             block.setBlock(mark.getData());
             block.setTransformation(x0of8);
+            blockDisplays.add(block);
         }
+        return blockDisplays;
     }
 
     static float length = 0.875f;//0.0625 x 14

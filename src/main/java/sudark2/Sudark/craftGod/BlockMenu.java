@@ -15,6 +15,7 @@ import org.joml.Vector3f;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static sudark2.Sudark.craftGod.CraftGod.displays;
 import static sudark2.Sudark.craftGod.CraftGod.get;
@@ -23,6 +24,8 @@ public class BlockMenu {
     // 1 创造 2 打印他人的投影 3 建造 4 从建筑码获取投影 5 显示距离调整
 
     public static final NamespacedKey MENU_INDEX_KEY = new NamespacedKey(get(), "menu_index");
+
+    public static ConcurrentHashMap<String, Location> menuLoc = new ConcurrentHashMap<>();
 
     public static ItemStack nameItem(Material m, String name) {
         ItemStack item = new ItemStack(m, 1);
@@ -33,12 +36,12 @@ public class BlockMenu {
     }
 
     public static CompletableFuture<Integer> menuInit(Player p, List<BlockDisplay> choices) {
-        // 1. 创建 CompletableFuture 实例
         CompletableFuture<Integer> futureIndex = new CompletableFuture<>();
+        String plName = p.getName();
+        Location centerLoc = menuLoc.get(plName);
 
         new BukkitRunnable() {
-            Location centerLoc = p.getLocation();
-            int distanceSquared = (choices.size() + 10) * (choices.size() + 10);
+            final int distanceSquared = 48 * 48;
             int time = 0;
 
             @Override
@@ -49,9 +52,10 @@ public class BlockMenu {
                 if (time > 300 * 10) {
                     if (!futureIndex.isDone()) {
                         futureIndex.complete(-1);
+                        menuLoc.remove(p.getName());
                     }
                     title(p, "[§e弃选]", "时间超过5分钟-自动为您弃选");
-                    menuFadeout(choices,p);
+                    menuFadeout(choices, p);
                     cancel();
                     return;
                 }
@@ -59,8 +63,9 @@ public class BlockMenu {
                 if (!p.isOnline() || p.getLocation().distanceSquared(centerLoc) > distanceSquared) {
                     if (!futureIndex.isDone()) {
                         futureIndex.complete(-1);
+                        menuLoc.remove(p.getName());
                     }
-                    menuFadeout(choices,p);
+                    menuFadeout(choices, p);
                     cancel();
                     return;
                 }
@@ -92,15 +97,16 @@ public class BlockMenu {
                         p.playSound(bl.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1, 1);
                         futureIndex.complete(index);
                     }
-                    menuFadeout(choices,p);
+                    menuFadeout(choices, p);
                     cancel();
                     return;
                 }
 
                 if (!futureIndex.isDone()) {
                     futureIndex.complete(-1);
+                    menuLoc.remove(p.getName());
                 }
-                menuFadeout(choices,p);
+                menuFadeout(choices, p);
                 cancel();
             }
         }.runTaskTimerAsynchronously(get(), 8, 2);
@@ -177,7 +183,10 @@ public class BlockMenu {
 
 
     public static List<BlockDisplay> spawnMenu(List<ItemStack> blocks, Player pl) {
-        Location plLoc = pl.getLocation();
+        String plName = pl.getName();
+        menuLoc.putIfAbsent(plName, pl.getLocation());
+        Location plLoc = menuLoc.get(plName);
+
         World world = plLoc.getWorld();
         Vector forward = plLoc.getDirection().setY(0); // 玩家朝向
         Vector right = new Vector(-forward.getZ(), 0, forward.getX()); // 玩家右侧方向
@@ -230,7 +239,7 @@ public class BlockMenu {
     }
 
 
-    public static void menuFadeout(List<BlockDisplay> choices,Player pl) {
+    public static void menuFadeout(List<BlockDisplay> choices, Player pl) {
         new BukkitRunnable() {
             @Override
             public void run() {

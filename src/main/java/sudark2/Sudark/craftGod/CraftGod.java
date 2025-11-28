@@ -4,6 +4,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.BlockDisplay;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
+import sudark2.Sudark.craftGod.CommandManager.RedoAndUndoCommand;
+import sudark2.Sudark.craftGod.CommandManager.TabManager;
 import sudark2.Sudark.craftGod.Listeners.BuildingCreate;
 import sudark2.Sudark.craftGod.Listeners.MenuHandler;
 
@@ -18,6 +20,9 @@ public final class CraftGod extends JavaPlugin {
     public void onEnable() {
         Bukkit.getPluginManager().registerEvents(new MenuHandler(), this);
         Bukkit.getPluginManager().registerEvents(new BuildingCreate(), this);
+
+        Bukkit.getPluginCommand("god").setExecutor(new RedoAndUndoCommand());
+        Bukkit.getPluginCommand("god").setTabCompleter(new TabManager());
 
         FileManager.init();
     }

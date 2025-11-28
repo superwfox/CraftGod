@@ -51,7 +51,10 @@ public class circleSpawner {
                             switch (index) {
                                 case 0 -> create(pl, finalHeight + 1, finalLength, finalWidth);
                                 case 1 -> create(pl, finalHeight - 1, finalLength, finalWidth);
-                                case 2 -> BuildingTemplate.put(pl.getName(), marks);
+                                case 2 -> {
+                                    BuildingTemplate.put(pl.getName(), marks);
+                                    menuLoc.remove(pl.getName());
+                                }
                                 case 3 -> create(pl, finalHeight, finalLength + 1, finalWidth);
                                 case 4 -> create(pl, finalHeight, finalLength - 1, finalWidth);
                                 case 5 -> create(pl, finalHeight, finalLength, finalWidth - 1);

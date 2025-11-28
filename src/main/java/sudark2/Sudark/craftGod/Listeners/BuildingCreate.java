@@ -3,9 +3,12 @@ package sudark2.Sudark.craftGod.Listeners;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.entity.BlockDisplay;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.checkerframework.checker.units.qual.C;
 import sudark2.Sudark.craftGod.Mark.Mark;
 
 import java.util.ArrayList;
@@ -16,8 +19,11 @@ import static sudark2.Sudark.craftGod.Mark.Mark.markDisplay;
 
 public class BuildingCreate implements Listener {
 
-   public static ConcurrentHashMap<String, List<Mark>> BuildingTemplate = new ConcurrentHashMap<>();
-   public static ConcurrentHashMap<String, List<Mark>> BuildingMark = new ConcurrentHashMap<>();
+    public static ConcurrentHashMap<String, List<Mark>> BuildingTemplate = new ConcurrentHashMap<>();
+
+    public static ConcurrentHashMap<String, List<Mark>> BuildingMark = new ConcurrentHashMap<>();
+    public static ConcurrentHashMap<String, List<BlockDisplay>> PreviewTemplate = new ConcurrentHashMap<>();
+    public static ConcurrentHashMap<String, List<Integer>> PlayerStep = new ConcurrentHashMap<>();
 
     @EventHandler
     public void onPlayerPlace(BlockPlaceEvent event) {
@@ -26,33 +32,52 @@ public class BuildingCreate implements Listener {
 
         if (type != Material.LIGHTNING_ROD) return;
 
-        if(BuildingTemplate.containsKey(event.getPlayer().getName())) {
+        if (BuildingTemplate.containsKey(event.getPlayer().getName())) {
             Location putLoc = block.getLocation();
             String name = event.getPlayer().getName();
-            List<Mark> marks = BuildingTemplate.get(name);
-            markDisplay(marks, putLoc);
-            appendMark(putLoc,name, marks);
 
+            applyMark(name, BuildingTemplate.get(name), putLoc);
             event.setBuild(false);
         }
 
     }
 
-    public static void appendMark(Location putLoc,String name, List<Mark> mark) {
+    public static void applyMark(String name, List<Mark> marks, Location putLoc) {
+        PreviewTemplate.putIfAbsent(name, new ArrayList<>());
+        PreviewTemplate.get(name).addAll(markDisplay(marks, putLoc));
 
-        if(!BuildingMark.containsKey(name)) {
-            BuildingMark.put(name, mark);
+        PlayerStep.putIfAbsent(name, new ArrayList<>());
+        PlayerStep.get(name).add(marks.size());
+
+        appendMark(putLoc, name, marks);
+    }
+
+    public static void appendMark(Location putLoc, String name, List<Mark> mark) {
+
+        if (!BuildingMark.containsKey(name)) {
+            BuildingMark.put(name, new ArrayList<>(mark));
             return;
         }
 
-        int[] start = mark.get(0).getLoc();
-        int[] offset = new int[]{putLoc.getBlockX() - start[0], putLoc.getBlockY() - start[1], putLoc.getBlockZ() - start[2]};
+        List<Mark> B = BuildingMark.get(name);
+        int[] start = B.getFirst().getLoc();
+        int[] offset = new int[]{
+                putLoc.getBlockX() - start[0],
+                putLoc.getBlockY() - start[1],
+                putLoc.getBlockZ() - start[2]
+        };
 
         List<Mark> newMark = new ArrayList<>();
-        mark.forEach(m ->{
-            newMark.add(new Mark(m.getLoc()[0] + offset[0], m.getLoc()[1] + offset[1], m.getLoc()[2] + offset[2], m.getData()));
+        mark.forEach(m -> {
+            newMark.add(new Mark(
+                    m.getLoc()[0] + offset[0],
+                    m.getLoc()[1] + offset[1],
+                    m.getLoc()[2] + offset[2],
+                    m.getData()
+            ));
         });
-        BuildingMark.get(name).addAll(newMark);
 
+        B.addAll(newMark);
     }
+
 }

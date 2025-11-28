@@ -22,8 +22,8 @@ public class romanColumnSpawner {
             nameItem(Material.QUARTZ_PILLAR, "高度+"),
             nameItem(Material.QUARTZ_SLAB, "高度-"),
             nameItem(Material.GOLD_BLOCK, "确认"),
-            nameItem(Material.QUARTZ_SLAB, "宽度-"),
-            nameItem(Material.SMOOTH_QUARTZ, "宽度+")
+            nameItem(Material.QUARTZ_SLAB, "半径-"),
+            nameItem(Material.SMOOTH_QUARTZ, "半径+")
     );
 
     public static void menu(Player p) {
@@ -35,7 +35,7 @@ public class romanColumnSpawner {
             height = 8;
             radius = 2;
         }
-        List<Mark> marks = createRomanPillar(height, radius, Material.QUARTZ_BLOCK.createBlockData());
+        List<Mark> marks = createRomanPillar(height, radius, Material.QUARTZ_PILLAR.createBlockData());
         List<BlockDisplay> preview = displayTemplate(pl, marks);
 
         int finalHeight = height;
@@ -47,7 +47,10 @@ public class romanColumnSpawner {
                             switch (index) {
                                 case 0 -> create(pl, finalHeight + 1, finalRadius);
                                 case 1 -> create(pl, finalHeight - 1, finalRadius);
-                                case 2 -> BuildingTemplate.put(pl.getName(), marks);
+                                case 2 -> {
+                                    BuildingTemplate.put(pl.getName(), marks);
+                                    menuLoc.remove(pl.getName());
+                                }
                                 case 3 -> create(pl, finalHeight, finalRadius - 1);
                                 case 4 -> create(pl, finalHeight, finalRadius + 1);
                             }
@@ -70,17 +73,26 @@ public class romanColumnSpawner {
                 }
             }
         }
-// 柱身（不变）
+
         for (int y = 2; y < height - 2; y++) {
             for (int x = -radius; x <= radius; x++) {
                 for (int z = -radius; z <= radius; z++) {
-                    if (x * x + z * z <= radius * radius + 0.5f) {
+
+                    // 归一化到 [-1, 1] 区间，稍微 +0.2 防止太瘦
+                    double nx = (double) x / (radius + 0.2);
+                    double nz = (double) z / (radius + 0.2);
+
+                    // n 越大越接近方形（圆角矩形）
+                    double n = 4.0; // 可以试 3.0, 4.0, 5.0
+                    double value = Math.pow(Math.abs(nx), n) + Math.pow(Math.abs(nz), n);
+
+                    if (value <= 1.0) {
                         pillar.add(new Mark(x, y, z, material));
                     }
                 }
             }
         }
-// 柱头（2层，去掉四角）
+
         for (int x = -r; x <= r; x++) {
             for (int z = -r; z <= r; z++) {
                 // 只保留非四角的方块

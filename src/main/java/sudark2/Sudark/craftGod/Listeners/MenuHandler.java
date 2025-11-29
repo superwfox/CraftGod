@@ -64,6 +64,8 @@ public class MenuHandler implements Listener {
         ItemStack item = pl.getItemInHand();
         if (item.getType() != Material.LIGHTNING_ROD) return;
 
+        if (pl.isFlying()) return;
+
         if (!pl.isSneaking()) {
             pl.setMetadata("sneak", new FixedMetadataValue(get(), true));
             Bukkit.getScheduler().runTaskLater(get(), () -> pl.removeMetadata("sneak", get()), 3);

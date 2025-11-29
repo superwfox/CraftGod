@@ -18,6 +18,7 @@ import static sudark2.Sudark.craftGod.Mark.Mark.markDisplay;
 public class BuildingCreate implements Listener {
 
     public static ConcurrentHashMap<String, List<Mark>> BuildingTemplate = new ConcurrentHashMap<>();
+    public static ConcurrentHashMap<String, int[]> BuildingStartPoint = new ConcurrentHashMap<>();
 
     public static ConcurrentHashMap<String, List<Mark>> BuildingMark = new ConcurrentHashMap<>();
     public static ConcurrentHashMap<String, List<BlockDisplay>> PreviewTemplate = new ConcurrentHashMap<>();
@@ -52,13 +53,16 @@ public class BuildingCreate implements Listener {
 
     public static void appendMark(Location putLoc, String name, List<Mark> mark) {
 
-        if (!BuildingMark.containsKey(name)) {
-            BuildingMark.put(name, new ArrayList<>(mark));
-            return;
-        }
+        BuildingMark.putIfAbsent(name, new ArrayList<>());
+        BuildingStartPoint.putIfAbsent(name, new int[]{
+                putLoc.getBlockX(),
+                putLoc.getBlockY(),
+                putLoc.getBlockZ()
+        });
 
         List<Mark> B = BuildingMark.get(name);
-        int[] start = B.getFirst().getLoc();
+
+        int[] start = BuildingStartPoint.get(name);
         int[] offset = new int[]{
                 putLoc.getBlockX() - start[0],
                 putLoc.getBlockY() - start[1],

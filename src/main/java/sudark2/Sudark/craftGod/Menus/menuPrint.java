@@ -1,11 +1,19 @@
 package sudark2.Sudark.craftGod.Menus;
 
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitRunnable;
+
+import static sudark2.Sudark.craftGod.CraftGod.get;
 
 public class menuPrint {
 
     public static void menu(Player p) {
+        new BukkitRunnable(){
+            @Override
+            public void run() {
 
+            }
+        }.runTaskTimerAsynchronously(get(), 0, 20);
     }
 
 }

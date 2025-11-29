@@ -38,6 +38,7 @@ public class RedoAndUndoCommand implements org.bukkit.command.CommandExecutor {
                     case "undo" -> undo(plName);
                     case "redo" -> redo(plName, pl);
                     case "finish" -> over(plName, pl);
+                    case "cancel" -> cancel(plName,pl);
                 }
 
                 return true;
@@ -104,7 +105,7 @@ public class RedoAndUndoCommand implements org.bukkit.command.CommandExecutor {
         saveTemplate(markFolder, code, Pair.of(putLoc, BuildingMark.get(name)));
 
         PreviewTemplate.get(name).forEach(display -> {
-            display.setTeleportDuration(40);
+            display.setTeleportDuration(38);
             display.teleport(display.getLocation().subtract(0, 20, 0));
         });
 
@@ -120,8 +121,25 @@ public class RedoAndUndoCommand implements org.bukkit.command.CommandExecutor {
             PlayerStep.remove(name);
 
             BuildingMark.remove(name);
+            BuildingStartPoint.remove(name);
 
         }, 40);
 
+    }
+
+    public void cancel(String name, Player pl) {
+        if (!BuildingMark.containsKey(name)) {
+            title(pl, "[失败]", "没有可取消的建筑");
+            return;
+        }
+
+        title(pl, "[取消]", "已取消创建");
+        PreviewTemplate.get(name).forEach(BlockDisplay::remove);
+        PreviewTemplate.remove(name);
+
+        PlayerStep.remove(name);
+
+        BuildingMark.remove(name);
+        BuildingStartPoint.remove(name);
     }
 }

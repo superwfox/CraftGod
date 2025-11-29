@@ -26,7 +26,7 @@ public class menuCreate {
 
     static final List<ItemStack> buildingTypes = List.of(
             nameItem(Material.QUARTZ_PILLAR, "罗马柱"),
-            nameItem(Material.TWISTING_VINES, "直线工具"),
+            nameItem(Material.CYAN_SHULKER_BOX, "矩形工具"),
             nameItem(Material.HONEY_BLOCK, "圆形工具"),
             nameItem(Material.BEEHIVE, "所有模板"),
             nameItem(Material.YELLOW_GLAZED_TERRACOTTA, "创建模板")

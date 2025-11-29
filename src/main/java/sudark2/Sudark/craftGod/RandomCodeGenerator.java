@@ -4,6 +4,8 @@ import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 
+import static sudark2.Sudark.craftGod.FileManager.loadAllMarks;
+
 public class RandomCodeGenerator {
     private static final int CODE_LENGTH = 6;  // 6位码长度
     private static final String CHARSET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";  // 字母组合（大写A-Z）
@@ -17,6 +19,7 @@ public class RandomCodeGenerator {
      * @return 唯一码
      */
     public String generateUniqueCode(int maxRetries) {
+        existingCodes = loadAllMarks();
         int retries = 0;
         while (retries < maxRetries) {
             String code = generateRandomCode();
@@ -26,7 +29,7 @@ public class RandomCodeGenerator {
             }
             retries++;
         }
-        throw new RuntimeException("生成唯一码失败，已重试 " + maxRetries + " 次，请检查码库大小。");
+        return "ERROR";
     }
 
     /**

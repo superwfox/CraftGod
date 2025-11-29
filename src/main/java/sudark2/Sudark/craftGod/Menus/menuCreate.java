@@ -17,10 +17,9 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 import static sudark2.Sudark.craftGod.BlockMenu.*;
+import static sudark2.Sudark.craftGod.FileManager.*;
 import static sudark2.Sudark.craftGod.Listeners.BuildingCreate.BuildingTemplate;
 import static sudark2.Sudark.craftGod.CraftGod.get;
-import static sudark2.Sudark.craftGod.FileManager.loadAllTemplateNames;
-import static sudark2.Sudark.craftGod.FileManager.loadTemplate;
 import static sudark2.Sudark.craftGod.Menus.createMenus.menuController.*;
 
 public class menuCreate {
@@ -70,7 +69,7 @@ public class menuCreate {
         String nameNow = names.get(order);
         World world = p.getWorld();
 
-        List<Mark> marks = loadTemplate(nameNow, world).right();
+        List<Mark> marks = loadTemplate(templateFolder,nameNow, world).right();
         final int N = names.size();
 
         String nextName = names.get((order + 1) % N);

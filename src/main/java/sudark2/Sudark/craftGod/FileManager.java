@@ -11,9 +11,7 @@ import sudark2.Sudark.craftGod.Mark.Mark;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static sudark2.Sudark.craftGod.CraftGod.get;
@@ -21,8 +19,8 @@ import static sudark2.Sudark.craftGod.CraftGod.get;
 public class FileManager {
 
     static File folder = get().getDataFolder();
-    static File templateFolder = new File(folder, "templates");
-    static File markFolder = new File(folder, "marks");
+    public static File templateFolder = new File(folder, "templates");
+    public static File markFolder = new File(folder, "marks");
 
     public static void init() {
         if (!folder.exists()) folder.mkdir();
@@ -30,11 +28,11 @@ public class FileManager {
         if (!markFolder.exists()) markFolder.mkdir();
     }
 
-    public static void saveTemplate(String templateName, Pair<Location, List<Mark>> markPair) {
-        File templateFile = new File(templateFolder, templateName + ".yml");
+    public static void saveTemplate(File folder,String templateName, Pair<Location, List<Mark>> markPair) {
+        File templateFile = new File(folder, templateName + ".yml");
         while(templateFile.exists()) {
             templateName += "-";
-            templateFile = new File(templateFolder, templateName + ".yml");
+            templateFile = new File(folder, templateName + ".yml");
         }
 
         Location startLoc = markPair.left();
@@ -69,9 +67,9 @@ public class FileManager {
         }
     }
 
-    public static Pair<Location, List<Mark>> loadTemplate(String templateName, World targetWorld) {
+    public static Pair<Location, List<Mark>> loadTemplate(File folder,String templateName, World targetWorld) {
         // 1. 检查文件是否存在
-        File templateFile = new File(templateFolder, templateName);
+        File templateFile = new File(folder, templateName);
         if (!templateFile.exists()) {
             System.err.println("模板文件不存在: " + templateName);
             return null;
@@ -123,5 +121,18 @@ public class FileManager {
                 .filter(File::isFile) // 过滤掉子目录
                 .map(File::getName)   // 提取文件名
                 .collect(Collectors.toList());
+    }
+
+    public static Set<String> loadAllMarks() {
+        File[] allEntries = markFolder.listFiles();
+
+        if (allEntries == null) {
+            return new HashSet<>();
+        }
+
+        return Arrays.stream(allEntries)
+                .filter(File::isFile)   // 过滤掉子目录
+                .map(File::getName)     // 提取文件名
+                .collect(Collectors.toSet());
     }
 }

@@ -13,7 +13,8 @@ public class TabManager implements TabCompleter {
     public @Nullable List<String> onTabComplete(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String @NotNull [] strings) {
         return List.of(
                 "undo",
-                "redo"
+                "redo",
+                "finish"
         );
     }
 }

@@ -20,6 +20,7 @@ import java.util.function.Consumer;
 
 import static sudark2.Sudark.craftGod.BlockMenu.*;
 import static sudark2.Sudark.craftGod.CraftGod.get;
+import static sudark2.Sudark.craftGod.FileManager.templateFolder;
 import static sudark2.Sudark.craftGod.Mark.MarkCreator.createMark;
 import static sudark2.Sudark.craftGod.FileManager.saveTemplate;
 
@@ -53,7 +54,7 @@ public class MenuHandler implements Listener {
 
             Pair<Location, List<Mark>> mark = createMark(tarLoc, temp.get(name));
             pl.removeMetadata("menu", get());
-            saveTemplate(pl.getName(), mark);
+            saveTemplate(templateFolder, pl.getName(), mark);
         }
     }
 

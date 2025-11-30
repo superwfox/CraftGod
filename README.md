@@ -1,4 +1,4 @@
-# CraftGod（创世神） | (用户使用文档)[https://github.com/superwfox/CraftGod/blob/master/USAGE.md]
+# CraftGod（创世神） | [用户使用文档](https://github.com/superwfox/CraftGod/blob/master/USAGE.md)
 
 一个基于 **BlockDisplay 预览 + 建筑码** 的建筑工具插件。  
 提供 3D 悬浮菜单、模板生成、几何体快速建模、撤销/重做、建筑码分享等功能。

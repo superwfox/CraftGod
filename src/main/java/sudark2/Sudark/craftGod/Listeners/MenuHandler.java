@@ -21,8 +21,10 @@ import java.util.function.Consumer;
 import static sudark2.Sudark.craftGod.BlockMenu.*;
 import static sudark2.Sudark.craftGod.CraftGod.get;
 import static sudark2.Sudark.craftGod.FileManager.templateFolder;
+import static sudark2.Sudark.craftGod.Listeners.BuildingCreate.PreviewTemplate;
 import static sudark2.Sudark.craftGod.Mark.MarkCreator.createMark;
 import static sudark2.Sudark.craftGod.FileManager.saveTemplate;
+import static sudark2.Sudark.craftGod.Menus.menuPrint.tasks;
 
 public class MenuHandler implements Listener {
 
@@ -74,6 +76,15 @@ public class MenuHandler implements Listener {
         if (!pl.isSneaking()) {
             pl.setMetadata("sneak", new FixedMetadataValue(get(), true));
             Bukkit.getScheduler().runTaskLater(get(), () -> pl.removeMetadata("sneak", get()), 3);
+
+            String key = pl.getName();
+            if (tasks.containsKey(key)) {
+                PreviewTemplate.get(key).forEach(bd -> bd.setGlowing(false));
+                title(pl, "[建造结束]", "现在不会自动搭建了");
+                tasks.get(key).cancel();
+                tasks.remove(key);
+                return;
+            }
 
             menuInit(
                     pl, spawnMenu(List.of(

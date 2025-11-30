@@ -33,7 +33,7 @@ public class Mark {
         return blockDisplays;
     }
 
-    static float length = 0.875f;//0.0625 x 14
+    static float length = 0.875f;//0.0625 x 10
     static Transformation x0of8 = new Transformation(
             new Vector3f(0.0625f, 0.0625f, 0.0625f),
             new Quaternionf(),

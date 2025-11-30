@@ -21,6 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import static sudark2.Sudark.craftGod.BlockMenu.menuLoc;
 import static sudark2.Sudark.craftGod.BlockMenu.title;
 import static sudark2.Sudark.craftGod.CraftGod.get;
+import static sudark2.Sudark.craftGod.Listeners.BuildingCreate.PreviewTemplate;
 
 public class menuPrint {
 
@@ -30,15 +31,9 @@ public class menuPrint {
 
     public static void menu(Player pl) {
         String key = pl.getName();
+        PreviewTemplate.get(key).forEach(bd -> bd.setGlowing(true));
 
         menuLoc.remove(key);
-
-        if (tasks.containsKey(key)) {
-            title(pl, "[建造结束]", "现在不会自动搭建了");
-            tasks.get(key).cancel();
-            tasks.remove(key);
-            return;
-        }
 
         title(pl, "[建造开始]", "现在开始会自动填充周围方块");
         BukkitTask task = new BukkitRunnable() {
@@ -56,6 +51,7 @@ public class menuPrint {
                 }
 
                 Inventory inv = pl.getInventory();
+                List<BlockDisplay> displays = PreviewTemplate.get(key);
                 for (BlockDisplay bd : blocks) {
                     BlockData data = bd.getBlock();
                     Material type = data.getMaterial();
@@ -71,6 +67,7 @@ public class menuPrint {
                     pl.playSound(pl, Sound.BLOCK_BAMBOO_PLACE, 1, 1);
                     Block block = bd.getLocation().getBlock();
                     block.setBlockData(data, false); // 第二个参数要不要物理更新看你需求
+                    displays.remove(bd);
                     bd.remove();
                 }
 

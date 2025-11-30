@@ -88,6 +88,17 @@ public class BlockMenu {
                         new Particle.DustTransition(Color.YELLOW, Color.ORANGE, 1.5f)
                 );
 
+                if(p.hasMetadata("touch")) {
+                    p.removeMetadata("touch", get());
+                    if (!futureIndex.isDone()) {
+                        futureIndex.complete(-2);
+                        menuLoc.remove(p.getName());
+                    }
+                    menuFadeout(choices, p);
+                    cancel();
+                    return;
+                }
+
                 if (!p.hasMetadata("click")) return;
 
                 if (bl != null) {

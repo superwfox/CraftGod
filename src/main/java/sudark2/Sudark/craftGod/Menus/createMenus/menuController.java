@@ -2,7 +2,9 @@ package sudark2.Sudark.craftGod.Menus.createMenus;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.BlockDisplay;
 import org.bukkit.entity.Player;
 import sudark2.Sudark.craftGod.Mark.Mark;
@@ -20,7 +22,7 @@ public class menuController {
     };
 
     public static int[][] faces = {
-            {0, 3}, {3, 0}, {0, -3}, {-3, 0}//z+ x+ x- z-
+            {0, 2}, {2, 0}, {0, -2}, {-2, 0}//z+ x+ x- z-
     };
 
     public static List<BlockDisplay> displayTemplate(Player p, List<Mark> marks) {
@@ -57,5 +59,10 @@ public class menuController {
             }
         });
         return marksPlaced;
+    }
+
+    public static BlockData checkItem(Material m, Material defaultType) {
+        if (m == null || !m.isBlock()) return defaultType.createBlockData();
+        return m.createBlockData();
     }
 }

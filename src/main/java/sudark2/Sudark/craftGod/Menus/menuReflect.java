@@ -8,11 +8,14 @@ import org.bukkit.plugin.Plugin;
 
 import sudark2.Sudark.craftGod.Listeners.ReflectListener;
 
+import static sudark2.Sudark.craftGod.BlockMenu.menuLoc;
 import static sudark2.Sudark.craftGod.BlockMenu.title;
 import static sudark2.Sudark.craftGod.CraftGod.get;
 
 public class menuReflect {
     public static void menu(Player p) {
+
+        menuLoc.remove(p.getName());
 
         title(p, "[输入建筑码]", "请在聊天框输入您要使用的建筑码");
         p.sendMessage("[创世神] 请在这里输入建筑码 无所谓大小写和空格 ：\n §7[一分钟后将自动取消]");

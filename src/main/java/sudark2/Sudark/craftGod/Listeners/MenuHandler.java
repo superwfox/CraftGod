@@ -56,6 +56,11 @@ public class MenuHandler implements Listener {
             pl.removeMetadata("menu", get());
             saveTemplate(templateFolder, pl.getName(), mark);
         }
+
+        if(ac.equals(Action.RIGHT_CLICK_AIR) || ac.equals(Action.RIGHT_CLICK_BLOCK)) {
+            pl.setMetadata("touch", new FixedMetadataValue(get(), true));
+            Bukkit.getScheduler().runTaskLater(get(), () -> pl.removeMetadata("touch", get()), 3);
+        }
     }
 
     @EventHandler

@@ -110,7 +110,6 @@ public class RedoAndUndoCommand implements org.bukkit.command.CommandExecutor {
         });
 
         Bukkit.getScheduler().runTaskLater(get(), () -> {
-
             String formattedCode = code.substring(0, 3) + " " + code.substring(3);
             title(pl, "[成功]", "已保存建筑码为 §e§l" + formattedCode);
             pl.sendMessage("[创世神] 建筑码： §e§l" + formattedCode);

@@ -14,6 +14,7 @@ import java.util.List;
 import static sudark2.Sudark.craftGod.BlockMenu.*;
 import static sudark2.Sudark.craftGod.CraftGod.get;
 import static sudark2.Sudark.craftGod.Listeners.BuildingCreate.BuildingTemplate;
+import static sudark2.Sudark.craftGod.Menus.createMenus.menuController.checkItem;
 import static sudark2.Sudark.craftGod.Menus.createMenus.menuController.displayTemplate;
 
 public class linerSpawner {
@@ -29,16 +30,16 @@ public class linerSpawner {
     );
 
     public static void menu(Player p) {
-        create(p, -1, -1, -1);
+        create(p, -1, -1, -1,null);
     }
 
-    public static void create(Player pl, int height, int length, int width) {
+    public static void create(Player pl, int height, int length, int width,Material material) {
         if (height == -1 || length == -1 || width == -1) {
             height = 2;
             length = 2;
             width = 2;
         }
-        List<Mark> marks = createSolidCuboid(height, length, width, Material.QUARTZ_BLOCK.createBlockData());
+        List<Mark> marks = createSolidCuboid(height, length, width,checkItem(material, Material.SMOOTH_QUARTZ));
         List<BlockDisplay> preview = displayTemplate(pl, marks);
 
         int finalHeight = height;
@@ -49,16 +50,17 @@ public class linerSpawner {
                         index -> {
                             Bukkit.getScheduler().runTask(get(), () -> preview.forEach(BlockDisplay::remove));
                             switch (index) {
-                                case 0 -> create(pl, finalHeight + 1, finalLength, finalWidth);
-                                case 1 -> create(pl, finalHeight - 1, finalLength, finalWidth);
+                                case -2 -> create(pl, finalHeight, finalLength, finalWidth, pl.getItemInHand() == null ? null : pl.getItemInHand().getType());
+                                case 0 -> create(pl, finalHeight + 1, finalLength, finalWidth, null);
+                                case 1 -> create(pl, finalHeight - 1, finalLength, finalWidth,null);
                                 case 2 -> {
                                     BuildingTemplate.put(pl.getName(), marks);
                                     menuLoc.remove(pl.getName());
                                 }
-                                case 3 -> create(pl, finalHeight, finalLength + 1, finalWidth);
-                                case 4 -> create(pl, finalHeight, finalLength - 1, finalWidth);
-                                case 5 -> create(pl, finalHeight, finalLength, finalWidth - 1);
-                                case 6 -> create(pl, finalHeight, finalLength, finalWidth + 1);
+                                case 3 -> create(pl, finalHeight, finalLength + 1, finalWidth,null);
+                                case 4 -> create(pl, finalHeight, finalLength - 1, finalWidth,null);
+                                case 5 -> create(pl, finalHeight, finalLength, finalWidth - 1,null);
+                                case 6 -> create(pl, finalHeight, finalLength, finalWidth + 1,null);
                             }
                         }
                 );

@@ -1,4 +1,4 @@
-# CraftGod（创世神） |  [用户使用文档](https://github.com/superwfox/CraftGod/blob/master/USAGE.md)  |  [[English Documention]](https://github.com/superwfox/CraftGod/blob/master/README_EN.md)
+# CraftGod（创世神 |  [[用户使用文档]](https://github.com/superwfox/CraftGod/blob/master/USAGE.md)  |  [[English Documention]](https://github.com/superwfox/CraftGod/blob/master/README_EN.md)
 
 基于 BlockDisplay 的 Minecraft 建筑辅助插件，提供 3D 悬浮菜单、几何体生成、模板系统、建筑码分享等功能。
 
